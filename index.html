@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ระบบบันทึกตรวจสภาพรถวัตถุดิบ | BETAGRO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #008837;
+      --primary-dark: #006828;
+      --primary-light: #e6f4ea;
+      --danger: #d32f2f;
+      --danger-light: #fde8e8;
+      --bg: #f4f6f8;
+      --card-bg: #ffffff;
+      --text: #212529;
+      --text-muted: #6c757d;
+      --border: #dee2e6;
+      --radius: 12px;
+      --shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Sarabun', sans-serif; background-color: var(--bg); color: var(--text); line-height: 1.5; padding-bottom: 40px; }
+    .header { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 20px 16px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+    .header h1 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .header p { font-size: 12px; opacity: 0.9; }
+    .form-code { display: inline-block; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-top: 4px; }
+    .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+    .card { background: var(--card-bg); border-radius: var(--radius); padding: 20px 16px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); }
+    .card-title { font-size: 16px; font-weight: 700; color: var(--primary-dark); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid var(--primary-light); padding-bottom: 8px; }
+    .card-title .badge { background: var(--primary); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; color: #333; }
+    label span.req { color: var(--danger); }
+    input[type="text"], input[type="date"], select { width: 100%; padding: 12px 14px; font-size: 15px; font-family: 'Sarabun', sans-serif; border: 1.5px solid var(--border); border-radius: 8px; background-color: #fafafa; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .quick-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 8px 12px; background: #f0f7f2; border-radius: 8px; }
+    .quick-bar span { font-size: 13px; color: var(--primary-dark); font-weight: 600; }
+    .btn-quick { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .check-item { padding: 12px; border-bottom: 1px solid #f0f0f0; display: flex; flex-direction: column; gap: 8px; }
+    .check-label { font-size: 14px; color: #2c3e50; }
+    .btn-toggle-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn-toggle { padding: 10px; font-size: 14px; font-weight: 600; border: 1.5px solid var(--border); border-radius: 8px; background: #fff; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .btn-toggle.ok.active { background: var(--primary-light); border-color: var(--primary); color: var(--primary-dark); font-weight: 700; }
+    .btn-toggle.ng.active { background: var(--danger-light); border-color: var(--danger); color: var(--danger); font-weight: 700; }
+    .sig-wrapper { border: 2px dashed #b2d8c1; border-radius: 8px; background: #fafcfb; position: relative; touch-action: none; }
+    canvas#sigCanvas { width: 100%; height: 160px; display: block; }
+    .sig-tools { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+    .btn-clear { background: #eceff1; color: #455a64; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; }
+    .consent-text { font-size: 12px; color: #555; background: #fff8e1; border-left: 3px solid #ffb300; padding: 8px 10px; border-radius: 4px; margin-top: 12px; }
+    .btn-submit { width: 100%; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; border: none; padding: 16px; font-size: 17px; font-weight: 700; border-radius: 10px; cursor: pointer; margin-top: 8px; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+    .modal { background: white; border-radius: 16px; padding: 24px; max-width: 400px; width: 100%; text-align: center; }
+    .btn-modal { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>บันทึกการตรวจสอบสภาพรถวัตถุดิบ</h1>
+    <p>ก่อน/หลังลงในคลังวัตถุดิบ (BETAGRO)</p>
+    <div class="form-code">FM-AGRO-FB-WH-01-00-01 : Rev.02</div>
+  </header>
+  <div class="container">
+    <form id="inspectForm">
+      <div class="card">
+        <div class="card-title"><span class="badge">1</span> ข้อมูลพื้นฐานการตรวจรับ</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="department">แผนก <span class="req">*</span></label>
+            <select id="department" required>
+              <option value="" disabled selected>-- เลือกแผนก --</option>
+              <option value="Silo1 T1">Silo1 T1</option>
+              <option value="Silo1 T2">Silo1 T2</option>
+              <option value="Silo2">Silo2</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="inspectDate">วันที่ตรวจ <span class="req">*</span></label>
+            <input type="date" id="inspectDate" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="factory">โรงงาน</label>
+          <input type="text" id="factory" value="โรงงานผลิตอาหารสัตว์">
+        </div>
+        <div class="form-group">
+          <label for="vendor">ผู้ขนส่ง / ผู้ขาย <span class="req">*</span></label>
+          <input type="text" id="vendor" placeholder="เช่น บริษัท ขนส่งรุ่งเรือง จำกัด" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="licensePlate">ทะเบียนรถบรรทุก <span class="req">*</span></label>
+            <input type="text" id="licensePlate" placeholder="เช่น 70-1234 สบ" required>
+          </div>
+          <div class="form-group">
+            <label for="materialName">ชื่อวัตถุดิบ <span class="req">*</span></label>
+            <input type="text" id="materialName" placeholder="เช่น ข้าวโพด" required>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="card">
+        <div class="card-title"><span class="badge">2</span> การตรวจสอบสภาพรถบรรทุก (ก่อนเข้า)</div>
+        <div class="quick-bar">
+          <span>ตรวจสภาพรถ 11 รายการ</span>
+          <button type="button" class="btn-quick" onclick="setAllPreCheck('OK')">✓ เลือกปกติทั้งหมด</button>
+        </div>
+        <div id="preCheckList"></div>
+      </div>
+ 
+      <div class="card">
+        <div class="card-title"><span class="badge">3</span> ความปลอดภัย & ตรวจสอบหลังลง</div>
+        <div class="check-item">
+          <div class="check-label"><b>12. การสวมใส่ชุดกันตก</b></div>
+          <div class="btn-toggle-group">
+            <button type="button" class="btn-toggle ok active" onclick="setToggle('harness', 'OK', this)">✓ ถูกต้อง</button>
+            <button type="button" class="btn-toggle ng" onclick="setToggle('harness', 'NG', this)">✗ ไม่ถูกต้อง</button>
+          </div>
+          <input type="hidden" id="harness" value="OK">
+        </div>
+        <div class="check-item">
+          <div class="check-label"><b>13. การคล้องเกี่ยวสายช่วยชีวิต</b></div>
+          <div class="btn-toggle-group">
+            <button type="button" class="btn-toggle ok active" onclick="setToggle('lifeline', 'OK', this)">✓ ถูกต้อง</button>
+            <button type="button" class="btn-toggle ng" onclick="setToggle('lifeline', 'NG', this)">✗ ไม่ถูกต้อง</button>
+          </div>
+          <input type="hidden" id="lifeline" value="OK">
+        </div>
+        <div class="check-item">
+          <div class="check-label"><b>14. การตรวจสอบรถบรรทุก (หลังลงวัตถุดิบ)</b></div>
+          <div class="btn-toggle-group">
+            <button type="button" class="btn-toggle ok active" onclick="setToggle('postCheck', 'OK', this)">✓ ปกติ (/)</button>
+            <button type="button" class="btn-toggle ng" onclick="setToggle('postCheck', 'NG', this)">✗ ผิดปกติ (X)</button>
+          </div>
+          <input type="hidden" id="postCheck" value="OK">
+        </div>
+      </div>
+ 
+      <div class="card">
+        <div class="card-title"><span class="badge">4</span> ลงชื่อผู้ขับขี่รถบรรทุก</div>
+        <div class="sig-wrapper"><canvas id="sigCanvas"></canvas></div>
+        <div class="sig-tools">
+          <span style="font-size:12px;color:#888;">ใช้นิ้วมือเซ็นชื่อในกรอบ</span>
+          <button type="button" class="btn-clear" onclick="clearSignature()">ล้างลายเซ็น</button>
+        </div>
+        <div class="consent-text">ข้าพเจ้าได้ร่วมตรวจสอบและยินยอมปฏิบัติตามกฎระเบียบของโรงงานอย่างเคร่งครัด</div>
+      </div>
+ 
+      <button type="submit" class="btn-submit">บันทึกข้อมูลการตรวจสอบ</button>
+    </form>
+  </div>
+ 
+  <div class="modal-overlay" id="successModal">
+    <div class="modal">
+      <h3 style="color:#008837;margin-bottom:8px;">✓ บันทึกสำเร็จ</h3>
+      <p id="modalDetail" style="font-size:14px;color:#555;"></p>
+      <button type="button" class="btn-modal" onclick="resetForm()">ตรวจรถคันถัดไป</button>
+    </div>
+  </div>
+ 
+  <script>
+    const preCheckItems = [
+      "1. ไม่มีเสียงดังผิดสภาพรถภายนอก ต้องไม่ชำรุดไม่ผุ",
+      "2. ไฟส่องสว่าง: ไฟหน้า ไฟท้าย ไฟเลี้ยวไม่แตก ชำรุด",
+      "3. ยางล้อของรถ ต้องไม่ฉีก ไม่ขาด",
+      "4. มีตะแกรงครอบท่อไอเสียกันสะเก็ดไฟครบถ้วน",
+      "5. ท่อไอเสียต้องไม่มีควันดำ และไม่มีประกายไฟ",
+      "6. ระบบเบรคเท้า เบรคมือ ไม่ชำรุด",
+      "7. ดั้มพ์ของกระบะท้ายรถไม่ชำรุด ยกขึ้น-ลงได้",
+      "8. ความสะอาดภายในกระบะรถบรรทุก",
+      "9. ไม่มีน้ำมันหกรั่วซึมออกมา",
+      "10. ไม่พบมีการใช้สารอบมอดมากับรถ",
+      "11. มีหมอนหนุนล้อ อย่างน้อย 1 คู่"
+    ];
+    const preCheckValues = Array(11).fill('OK');
+    const container = document.getElementById('preCheckList');
+    preCheckItems.forEach((t, i) => {
+      const d = document.createElement('div');
+      d.className = 'check-item';
+      d.innerHTML = `
+        <div class="check-label">${t}</div>
+        <div class="btn-toggle-group">
+          <button type="button" class="btn-toggle ok active" id="btn-ok-${i}" onclick="setPreCheck(${i}, 'OK')">✓ ปกติ (/)</button>
+          <button type="button" class="btn-toggle ng" id="btn-ng-${i}" onclick="setPreCheck(${i}, 'NG')">✗ ผิดปกติ (X)</button>
+        </div>`;
+      container.appendChild(d);
+    });
+    function setPreCheck(i, v) {
+      preCheckValues[i] = v;
+      document.getElementById(`btn-ok-${i}`).classList.toggle('active', v==='OK');
+      document.getElementById(`btn-ng-${i}`).classList.toggle('active', v==='NG');
+    }
+    function setAllPreCheck(v) { for(let i=0; i<11; i++) setPreCheck(i, v); }
+    function setToggle(id, v, btn) {
+      document.getElementById(id).value = v;
+      btn.parentElement.querySelectorAll('.btn-toggle').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('inspectDate').value = today;
+ 
+    const canvas = document.getElementById('sigCanvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false, hasSig = false;
+    function resizeCanvas() {
+      const r = canvas.getBoundingClientRect();
+      canvas.width = r.width * 2;
+      canvas.height = r.height * 2;
+      ctx.scale(2, 2);
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#003366';
+    }
+    window.addEventListener('load', resizeCanvas);
+    function getPos(e) {
+      const r = canvas.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX;
+      const cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: cx - r.left, y: cy - r.top };
+    }
+    function startD(e) { isDrawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); if(e.cancelable && e.type.startsWith('touch')) e.preventDefault(); }
+    function moveD(e) { if(!isDrawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasSig = true; if(e.cancelable && e.type.startsWith('touch')) e.preventDefault(); }
+    function stopD() { isDrawing = false; }
+    canvas.addEventListener('mousedown', startD); canvas.addEventListener('mousemove', moveD); window.addEventListener('mouseup', stopD);
+    canvas.addEventListener('touchstart', startD, {passive:false}); canvas.addEventListener('touchmove', moveD, {passive:false}); window.addEventListener('touchend', stopD);
+    function clearSignature() { ctx.clearRect(0, 0, canvas.width, canvas.height); hasSig = false; }
+ 
+    document.getElementById('inspectForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      if(!hasSig) { alert('กรุณาลงลายมือชื่อก่อนบันทึก'); return; }
+      const lp = document.getElementById('licensePlate').value;
+      const dept = document.getElementById('department').value;
+      document.getElementById('modalDetail').innerHTML = `<b>ทะเบียน:</b> ${lp}<br><b>แผนก:</b> ${dept}<br>บันทึกเรียบร้อยแล้ว`;
+      document.getElementById('successModal').style.display = 'flex';
+    });
+    function resetForm() {
+      document.getElementById('successModal').style.display = 'none';
+      document.getElementById('vendor').value = '';
+      document.getElementById('licensePlate').value = '';
+      document.getElementById('materialName').value = '';
+      setAllPreCheck('OK');
+      clearSignature();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>
